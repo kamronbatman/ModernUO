@@ -21,9 +21,9 @@ namespace SerializationGenerator
 {
     public static partial class SourceGeneration
     {
-        public static void GenerateMethodStart(this StringBuilder source, string methodName, string accessors, bool isOverride, string returnType, ImmutableArray<(ITypeSymbol, string)> parameters)
+        public static void GenerateMethodStart(this StringBuilder source, string methodName, AccessModifier accessors, bool isOverride, string returnType, ImmutableArray<(ITypeSymbol, string)> parameters)
         {
-            source.Append($@"        {accessors}{(isOverride ? " override" : "")} {returnType} {methodName}(");
+            source.Append($@"        {accessors.ToFriendlyString()}{(isOverride ? " override" : "")} {returnType} {methodName}(");
             source.GenerateSignatureArguments(parameters);
             source.AppendLine(@")
         {");
@@ -32,11 +32,11 @@ namespace SerializationGenerator
         public static void GenerateMethodEnd(this StringBuilder source) => source.AppendLine(@"        }");
 
         public static void GenerateConstructorStart(
-            this StringBuilder source, string ctorName, string accessors, ImmutableArray<(ITypeSymbol, string)> parameters,
+            this StringBuilder source, string className, AccessModifier accessors, ImmutableArray<(ITypeSymbol, string)> parameters,
             ImmutableArray<TypedConstant> baseParameters, bool isOverload = false
         )
         {
-            source.Append($@"        {accessors} {ctorName}(");
+            source.Append($@"        {accessors.ToFriendlyString()} {className}(");
             source.GenerateSignatureArguments(parameters);
             source.Append(')');
             bool hasBaseParams = baseParameters.Length > 0;
