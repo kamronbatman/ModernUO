@@ -45,7 +45,6 @@ namespace Server.Json
             options.Converters.Add(new Rectangle3DConverterFactory());
             options.Converters.Add(new TimeSpanConverterFactory());
             options.Converters.Add(new IPEndPointConverterFactory());
-            options.Converters.Add(new NullableStructSerializerFactory());
             options.Converters.Add(new TypeConverterFactory());
             options.Converters.Add(new WorldLocationConverterFactory());
 

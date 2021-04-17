@@ -142,7 +142,7 @@ namespace Server
             _savePath = Path.Combine(Core.BaseDirectory, savePath);
 
             // Mobiles & Items
-            Persistence.Register(SaveEntities, WriteEntities, LoadEntities, 1);
+            Persistence.Register("Mobiles & Items", SaveEntities, WriteEntities, LoadEntities, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -658,12 +658,14 @@ namespace Server
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveGuild(BaseGuild guild) => Guilds.Remove(guild.Serial);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteConsole(string message)
         {
             var now = DateTime.UtcNow;
             Console.Write("[{0} {1}] World: {2}", now.ToShortDateString(), now.ToLongTimeString(), message);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteConsoleLine(string message)
         {
             var now = DateTime.UtcNow;
