@@ -33,7 +33,7 @@ namespace SerializationGenerator
 
         public static void GenerateConstructorStart(
             this StringBuilder source, string className, AccessModifier accessors, ImmutableArray<(ITypeSymbol, string)> parameters,
-            ImmutableArray<TypedConstant> baseParameters, bool isOverload = false
+            ImmutableArray<string> baseParameters, bool isOverload = false
         )
         {
             source.Append($@"        {accessors.ToFriendlyString()} {className}(");
@@ -43,7 +43,14 @@ namespace SerializationGenerator
             if (hasBaseParams)
             {
                 source.AppendFormat(" : {0}(", isOverload ? "this" : "base");
-                source.GenerateTypedConstants(baseParameters);
+                for (int i = 0; i < baseParameters.Length; i++)
+                {
+                    source.Append(baseParameters[i]);
+                    if (i < baseParameters.Length - 1)
+                    {
+                        source.Append(',');
+                    }
+                }
                 source.Append(')');
             }
 

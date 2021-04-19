@@ -13,15 +13,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System.Collections.Immutable;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace SerializationGenerator
 {
     public static partial class SourceGeneration
     {
-        public static void GenerateClassStart(this StringBuilder source, string className)
+        public static void GenerateClassStart(this StringBuilder source, string className, ImmutableArray<ITypeSymbol> interfaces)
         {
-            source.AppendLine($@"    public partial class {className}
+            source.Append($@"    public partial class {className}");
+            if (!interfaces.IsEmpty)
+            {
+                source.Append(": ");
+                for (var i = 0; i < interfaces.Length; i++)
+                {
+                    source.Append(interfaces[i].ToDisplayString());
+                    if (i < interfaces.Length - 1)
+                    {
+                        source.Append(", ");
+                    }
+                }
+            }
+
+            source.Append(@"
     {{"
             );
         }

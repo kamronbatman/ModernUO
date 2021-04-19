@@ -13,7 +13,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -50,18 +49,11 @@ namespace SerializationGenerator
                 return;
             }
 
-            var serializableEntityAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableAttribute");
-            var serializableFieldAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttribute");
-            var serializableInterfaceAttribute = context.Compilation.GetTypeByMetadataName("Server.ISerializable");
-
             foreach (IGrouping<ISymbol, IFieldSymbol> group in receiver.Fields.GroupBy(f => f.ContainingType, SymbolEqualityComparer.Default))
             {
-                string classSource = GenerateSerializationPartialClass(
+                string classSource = SerializableEntityGeneration.GenerateSerializationPartialClass(
                     group.Key as INamedTypeSymbol,
                     group.ToList(),
-                    serializableEntityAttribute,
-                    serializableFieldAttribute,
-                    serializableInterfaceAttribute,
                     context
                 );
 
@@ -70,76 +62,6 @@ namespace SerializationGenerator
                     context.AddSource($"{group.Key.Name}.Serialization.cs", SourceText.From(classSource, Encoding.UTF8));
                 }
             }
-        }
-
-        private static bool ContainsInterface(ITypeSymbol symbol, ISymbol interfaceSymbol) =>
-            symbol?.AllInterfaces.Any(i => i.Equals(interfaceSymbol, SymbolEqualityComparer.Default)) ?? false;
-
-        private static string GenerateSerializationPartialClass(
-            INamedTypeSymbol classSymbol,
-            List<IFieldSymbol> fields,
-            ISymbol serializableEntityAttribute,
-            ISymbol serializableFieldAttribute,
-            ISymbol serializableInterfaceAttribute,
-            GeneratorExecutionContext context
-        )
-        {
-            // This is a class symbol if the containing symbol is the namespace
-            if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
-            {
-                return null;
-            }
-
-            // If we have a parent that is or derives from ISerializable, then we are in override
-            var isOverride = ContainsInterface(classSymbol.BaseType, serializableInterfaceAttribute);
-
-            if (!isOverride && !ContainsInterface(classSymbol, serializableInterfaceAttribute))
-            {
-                return null;
-            }
-
-            var versionValue = classSymbol.GetAttributes()
-                .FirstOrDefault(
-                    attr => attr.AttributeClass?.Equals(serializableEntityAttribute, SymbolEqualityComparer.Default) ?? false
-                )
-                ?.ConstructorArguments.FirstOrDefault()
-                .Value;
-
-            if (versionValue == null)
-            {
-                return null; // We don't have the attribute
-            }
-
-            var version = int.Parse(versionValue.ToString());
-
-            string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
-
-            StringBuilder source = new StringBuilder();
-
-            GenerateClass(source, namespaceName, classSymbol.Name, version);
-
-            foreach (IFieldSymbol fieldSymbol in fields)
-            {
-                var hasAttribute = fieldSymbol.GetAttributes()
-                    .Any(
-                        attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttribute)
-                    );
-
-                if (!hasAttribute)
-                {
-                    continue;
-                }
-
-                source.GenerateProperty(fieldSymbol, serializableFieldAttribute);
-            }
-
-            source.GenerateSerializeMethod(fields, version);
-            source.AppendLine();
-            source.GenerateDeserializeMethod(fields, version);
-
-            source.GenerateClassEnd();
-
-            return source.ToString();
         }
     }
 }
