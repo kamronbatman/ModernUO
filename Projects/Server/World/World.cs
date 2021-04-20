@@ -22,6 +22,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Server.Guilds;
+using Server.Logging;
 using Server.Network;
 
 namespace Server
@@ -37,6 +38,8 @@ namespace Server
 
     public static class World
     {
+        private static readonly ILogger logger = LogFactory.GetLogger(typeof(World));
+
         private static readonly ManualResetEvent m_DiskWriteHandle = new(true);
         private static readonly Dictionary<Serial, IEntity> _pendingAdd = new();
         private static readonly Dictionary<Serial, IEntity> _pendingDelete = new();
@@ -155,7 +158,7 @@ namespace Server
         {
             if (WorldState != WorldState.Saving)
             {
-                WriteConsoleLine($"Attempting to queue {item} for decay but the world is not saving");
+                logger.Warning($"Attempting to queue {item} for decay but the world is not saving");
                 return;
             }
 
@@ -246,7 +249,7 @@ namespace Server
 
             WorldState = WorldState.Loading;
 
-            WriteConsole("Loading...");
+            logger.Information("Loading world");
             var watch = Stopwatch.StartNew();
 
             Persistence.Load(_savePath);
@@ -274,15 +277,11 @@ namespace Server
 
             watch.Stop();
 
-            Utility.PushColor(ConsoleColor.Green);
-            Console.Write("done");
-            Utility.PopColor();
-            Console.WriteLine(
-                " ({1} items, {2} mobiles) ({0:F2} seconds)",
+            logger.Information(string.Format("World loaded ({1} items, {2} mobiles) ({0:F2} seconds)",
                 watch.Elapsed.TotalSeconds,
                 Items.Count,
                 Mobiles.Count
-            );
+            ));
 
             WorldState = WorldState.Running;
         }
@@ -310,7 +309,7 @@ namespace Server
             var message =
                 $"Warning: Attempted to {action} {entity} during world save.{Environment.NewLine}This action could cause inconsistent state.{Environment.NewLine}It is strongly advised that the offending scripts be corrected.";
 
-            WriteConsoleLine(message);
+            logger.Information(message);
 
             try
             {
@@ -384,7 +383,7 @@ namespace Server
             try
             {
                 var watch = Stopwatch.StartNew();
-                WriteConsole("Writing snapshot...");
+                logger.Information("Writing snapshot...");
 
                 Persistence.WriteSnapshot(tempPath);
 
@@ -476,7 +475,7 @@ namespace Server
 
             var now = DateTime.UtcNow;
 
-            WriteConsole("Saving...");
+            logger.Information("Saving world");
 
             var watch = Stopwatch.StartNew();
 
@@ -593,9 +592,7 @@ namespace Server
                     {
                         if (_pendingDelete.Remove(entity.Serial))
                         {
-                            Utility.PushColor(ConsoleColor.Red);
-                            WriteConsoleLine($"Deleted then added {entity.GetType().Name} during {WorldState.ToString()} state.");
-                            Utility.PopColor();
+                            logger.Warning($"Deleted then added {entity.GetType().Name} during {WorldState.ToString()} state.");
                         }
                         _pendingAdd[entity.Serial] = entity;
                         break;
@@ -657,19 +654,5 @@ namespace Server
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveGuild(BaseGuild guild) => Guilds.Remove(guild.Serial);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteConsole(string message)
-        {
-            var now = DateTime.UtcNow;
-            Console.Write("[{0} {1}] World: {2}", now.ToShortDateString(), now.ToLongTimeString(), message);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void WriteConsoleLine(string message)
-        {
-            var now = DateTime.UtcNow;
-            Console.WriteLine("[{0} {1}] World: {2}", now.ToShortDateString(), now.ToLongTimeString(), message);
-        }
     }
 }
