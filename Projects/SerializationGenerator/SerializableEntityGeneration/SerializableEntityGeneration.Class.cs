@@ -84,12 +84,32 @@ namespace SerializationGenerator
                         attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttribute)
                     );
 
-                if (!hasAttribute)
+                if (hasAttribute)
                 {
-                    continue;
+                    source.GenerateSerializableProperty(fieldSymbol, serializableFieldAttribute);
                 }
+            }
 
-                source.GenerateProperty(fieldSymbol, serializableFieldAttribute);
+            // If we are not inheriting ISerializable, then we need to define some stuff
+            if (!isOverride)
+            {
+                // long ISerializable.SavePosition { get; set; }
+                source.GenerateAutoProperty(
+                    AccessModifier.None,
+                    "long",
+                    "ISerializable.SavePosition",
+                    AccessModifier.None,
+                    AccessModifier.None
+                );
+
+                // BufferWriter ISerializable.SaveBuffer { get; set; }
+                source.GenerateAutoProperty(
+                    AccessModifier.None,
+                    "BufferWriter",
+                    "ISerializable.SaveBuffer",
+                    AccessModifier.None,
+                    AccessModifier.None
+                );
             }
 
             // Serial constructor
@@ -103,6 +123,8 @@ namespace SerializationGenerator
                 "void",
                 new ImmutableArray<(ITypeSymbol, string)>{ (genericWriterInterface, "writer") }
             );
+            // Generate serialize method stuff here
+
             source.GenerateMethodEnd();
 
             // Deserialize Method
@@ -113,6 +135,7 @@ namespace SerializationGenerator
                 "void",
                 new ImmutableArray<(ITypeSymbol, string)>{ (genericReaderInterface, "reader") }
             );
+            // Generate deserialize method stuff here
             source.GenerateMethodEnd();
 
             source.GenerateClassEnd();

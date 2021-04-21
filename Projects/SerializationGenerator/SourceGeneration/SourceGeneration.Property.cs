@@ -82,12 +82,19 @@ namespace SerializationGenerator
                 throw new ArgumentNullException($"Must specify a {nameof(getAccessor)} or {nameof(setAccessor)} parameter");
             }
 
-            var getter = getAccessor != null ? $"{getAccessor.Value.ToFriendlyString()} get;" : "";
-            var getterSpace = getAccessor != null ? " " : "";
-            var setOrInit = useInit ? "init" : "set";
-            var setter = setAccessor != null ? $"{getterSpace}{setAccessor.Value.ToFriendlyString()} {setOrInit};" : "";
+            var getter = getAccessor == null ?
+                "" :
+                $"{(getAccessor != AccessModifier.None ? $"{getAccessor.Value.ToFriendlyString()} " : "")}get;";
 
-            source.AppendLine($@"{accessors.ToFriendlyString()} {type} {propertyName} {{ {getter}{setter} }}");
+            var getterSpace = getAccessor != null ? " " : "";
+            var setOrInit = useInit ? "init;" : "set;";
+
+            var setterAccessor = setAccessor != AccessModifier.None ? $"{setAccessor.Value.ToFriendlyString()} " : "";
+            var setter = setterAccessor == "" ? "" : $"{getterSpace}{setterAccessor}{setOrInit}";
+
+            var propertyAccessor = accessors == AccessModifier.None ? "" : $"{accessors.ToFriendlyString()} ";
+
+            source.AppendLine($@"{propertyAccessor}{type} {propertyName} {{ {getter}{setter} }}");
         }
 
         public static void GeneratePropertyEnd(this StringBuilder source) => source.AppendLine("        }");

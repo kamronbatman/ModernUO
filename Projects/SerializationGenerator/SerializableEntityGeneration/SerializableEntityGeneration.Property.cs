@@ -20,7 +20,7 @@ namespace SerializationGenerator
 {
     public static partial class SerializableEntityGeneration
     {
-        public static void GenerateProperty(
+        public static void GenerateSerializableProperty(
             this StringBuilder source,
             IFieldSymbol fieldSymbol,
             ISymbol serializableFieldAttribute
