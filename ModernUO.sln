@@ -14,6 +14,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Projects\Benc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializationGenerator", "Projects\SerializationGenerator\SerializationGenerator.csproj", "{07DDB8CF-F926-44F4-A584-FF2997D2C9D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializationGenerator.Tests", "Projects\SerializationGenerator.Tests\SerializationGenerator.Tests.csproj", "{2BC92375-BB66-4CA5-B39C-36215749FE64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Analyze|x64 = Analyze|x64
@@ -57,6 +59,12 @@ Global
 		{07DDB8CF-F926-44F4-A584-FF2997D2C9D0}.Debug|x64.Build.0 = Debug|x64
 		{07DDB8CF-F926-44F4-A584-FF2997D2C9D0}.Release|x64.ActiveCfg = Release|x64
 		{07DDB8CF-F926-44F4-A584-FF2997D2C9D0}.Release|x64.Build.0 = Release|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Analyze|x64.ActiveCfg = Analyze|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Analyze|x64.Build.0 = Analyze|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Debug|x64.ActiveCfg = Debug|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Debug|x64.Build.0 = Debug|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Release|x64.ActiveCfg = Release|x64
+		{2BC92375-BB66-4CA5-B39C-36215749FE64}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

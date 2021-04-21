@@ -13,6 +13,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -73,8 +74,8 @@ namespace SerializationGenerator
             source.GenerateClassStart(
                 className,
                 isOverride ?
-                    new ImmutableArray<ITypeSymbol>{ serializableInterface } :
-                    ImmutableArray<ITypeSymbol>.Empty
+                    ImmutableArray<ITypeSymbol>.Empty :
+                    ImmutableArray.Create<ITypeSymbol>(serializableInterface)
             );
 
             foreach (IFieldSymbol fieldSymbol in fields)
@@ -87,6 +88,7 @@ namespace SerializationGenerator
                 if (hasAttribute)
                 {
                     source.GenerateSerializableProperty(fieldSymbol, serializableFieldAttribute);
+                    source.AppendLine();
                 }
             }
 
@@ -101,6 +103,7 @@ namespace SerializationGenerator
                     AccessModifier.None,
                     AccessModifier.None
                 );
+                source.AppendLine();
 
                 // BufferWriter ISerializable.SaveBuffer { get; set; }
                 source.GenerateAutoProperty(
@@ -110,10 +113,12 @@ namespace SerializationGenerator
                     AccessModifier.None,
                     AccessModifier.None
                 );
+                source.AppendLine();
             }
 
             // Serial constructor
-            source.GenerateSerialCtor(context, className);
+            source.GenerateSerialCtor(context, className, isOverride);
+            source.AppendLine();
 
             // Serialize Method
             source.GenerateMethodStart(
@@ -121,11 +126,11 @@ namespace SerializationGenerator
                 AccessModifier.Public,
                 isOverride,
                 "void",
-                new ImmutableArray<(ITypeSymbol, string)>{ (genericWriterInterface, "writer") }
+                ImmutableArray.Create<(ITypeSymbol, string)>((genericWriterInterface, "writer"))
             );
             // Generate serialize method stuff here
-
             source.GenerateMethodEnd();
+            source.AppendLine();
 
             // Deserialize Method
             source.GenerateMethodStart(
@@ -133,15 +138,13 @@ namespace SerializationGenerator
                 AccessModifier.Public,
                 isOverride,
                 "void",
-                new ImmutableArray<(ITypeSymbol, string)>{ (genericReaderInterface, "reader") }
+                ImmutableArray.Create<(ITypeSymbol, string)>((genericReaderInterface, "reader"))
             );
             // Generate deserialize method stuff here
             source.GenerateMethodEnd();
 
             source.GenerateClassEnd();
             source.GenerateNamespaceEnd();
-
-            source.GenerateClassEnd();
 
             return source.ToString();
         }

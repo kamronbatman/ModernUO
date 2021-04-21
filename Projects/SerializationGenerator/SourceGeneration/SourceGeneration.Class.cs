@@ -26,7 +26,7 @@ namespace SerializationGenerator
             source.Append($@"    public partial class {className}");
             if (!interfaces.IsEmpty)
             {
-                source.Append(": ");
+                source.Append(" : ");
                 for (var i = 0; i < interfaces.Length; i++)
                 {
                     source.Append(interfaces[i].ToDisplayString());
@@ -37,14 +37,13 @@ namespace SerializationGenerator
                 }
             }
 
-            source.Append(@"
-    {{"
-            );
+            source.AppendLine(@"
+    {");
         }
 
         public static void GenerateClassEnd(this StringBuilder source)
         {
-            source.AppendLine(@"    }");
+            source.AppendLine("    }");
         }
     }
 }

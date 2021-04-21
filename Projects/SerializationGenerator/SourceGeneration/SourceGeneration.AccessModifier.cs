@@ -31,13 +31,13 @@ namespace SerializationGenerator
         public static string ToFriendlyString(this AccessModifier modifier) =>
             modifier switch
             {
-                AccessModifier.None => "",
                 AccessModifier.Public => "public",
                 AccessModifier.Private => "private",
                 AccessModifier.Protected => "protected",
                 AccessModifier.Internal => "internal",
                 AccessModifier.ProtectedInternal => "protected internal",
-                AccessModifier.PrivateProtected => "private protected"
+                AccessModifier.PrivateProtected => "private protected",
+                _ => ""
             };
     }
 }

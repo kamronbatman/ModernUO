@@ -25,7 +25,8 @@ namespace SerializationGenerator
         public static void GenerateSerialCtor(
             this StringBuilder source,
             GeneratorExecutionContext context,
-            string className
+            string className,
+            bool isOverride
         )
         {
             var serialType = (ITypeSymbol)context.Compilation.GetTypeByMetadataName("Server.Serial");
@@ -34,11 +35,14 @@ namespace SerializationGenerator
                 className,
                 AccessModifier.Public,
                 new []{ (serialType, "serial") }.ToImmutableArray(),
-                _baseParameters
+                isOverride ? ImmutableArray<string>.Empty : _baseParameters
             );
 
-            source.Append(@$"            Serial = serial;
+            if (!isOverride)
+            {
+                source.Append(@$"            Serial = serial;
             SetTypeRef(typeof({className}));");
+            }
 
             source.GenerateMethodEnd();
         }

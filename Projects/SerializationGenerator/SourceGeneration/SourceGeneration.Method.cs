@@ -54,7 +54,7 @@ namespace SerializationGenerator
                 source.Append(')');
             }
 
-            source.AppendLine("        {");
+            source.AppendLine("\n        {");
         }
     }
 }

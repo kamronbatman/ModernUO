@@ -37,7 +37,7 @@ namespace SerializationGenerator
             source.AppendLine(
                 $@"                if (value != {fieldName})
                 {{
-                    MarkDirty();
+                    ((ISerializable)this).MarkDirty();
                     {fieldName} = value;
                 }}"
             );

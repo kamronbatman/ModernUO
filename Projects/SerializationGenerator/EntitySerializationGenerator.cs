@@ -29,7 +29,7 @@ namespace SerializationGenerator
 #if DEBUG
             if (!Debugger.IsAttached)
             {
-                // Debugger.Launch();
+                Debugger.Launch();
             }
 #endif
 
