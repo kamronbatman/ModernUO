@@ -32,11 +32,6 @@ namespace SerializationGenerator
                 source.Append("(");
             }
 
-            if (hasArgs)
-            {
-                source.Append(")");
-            }
-
             for (var i = 0; i < ctorArgs.Length; i++)
             {
                 var arg = ctorArgs[i];
@@ -55,6 +50,11 @@ namespace SerializationGenerator
                 {
                     source.Append(", ");
                 }
+            }
+
+            if (hasArgs)
+            {
+                source.Append(")");
             }
 
             source.AppendLine("]");

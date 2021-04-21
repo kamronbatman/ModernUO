@@ -13,6 +13,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
@@ -99,7 +100,14 @@ namespace SerializationGenerator
                     }
                 case TypedConstantKind.Enum:
                     {
-                        source.AppendFormat("{0}.{1}", arg.Type?.Name, arg.Value);
+                        if (arg.Type == null || arg.Value == null)
+                        {
+                            source.Append("null");
+                        }
+                        else
+                        {
+                            source.AppendFormat("({0}){1}", arg.Type.ToDisplayString(), arg.Value);
+                        }
                         break;
                     }
                 case TypedConstantKind.Type:
