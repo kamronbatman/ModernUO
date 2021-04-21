@@ -14,6 +14,7 @@
  *************************************************************************/
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -30,7 +31,9 @@ namespace SerializationGenerator
         {
             var serializableEntityAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableAttribute");
             var serializableFieldAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttribute");
-            var serializableInterfaceAttribute = context.Compilation.GetTypeByMetadataName("Server.ISerializable");
+            var serializableInterface = context.Compilation.GetTypeByMetadataName("Server.ISerializable");
+            var genericWriterInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericWriter");
+            var genericReaderInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericReader");
 
             // This is a class symbol if the containing symbol is the namespace
             if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
@@ -39,9 +42,9 @@ namespace SerializationGenerator
             }
 
             // If we have a parent that is or derives from ISerializable, then we are in override
-            var isOverride = classSymbol.BaseType.ContainsInterface(serializableInterfaceAttribute);
+            var isOverride = classSymbol.BaseType.ContainsInterface(serializableInterface);
 
-            if (!isOverride && !classSymbol.ContainsInterface(serializableInterfaceAttribute))
+            if (!isOverride && !classSymbol.ContainsInterface(serializableInterface))
             {
                 return null;
             }
@@ -66,12 +69,13 @@ namespace SerializationGenerator
             StringBuilder source = new StringBuilder();
 
             source.GenerateNamespaceStart(namespaceName);
-            source.GenerateClassStart(className);
 
-            source.GenerateSerialCtor(context, className, namespaceList);
-
-            source.GenerateClassEnd();
-            source.GenerateNamespaceEnd();
+            source.GenerateClassStart(
+                className,
+                isOverride ?
+                    new ImmutableArray<ITypeSymbol>{ serializableInterface } :
+                    ImmutableArray<ITypeSymbol>.Empty
+            );
 
             foreach (IFieldSymbol fieldSymbol in fields)
             {
@@ -88,9 +92,31 @@ namespace SerializationGenerator
                 source.GenerateProperty(fieldSymbol, serializableFieldAttribute);
             }
 
-            source.GenerateSerializeMethod(fields, version);
-            source.AppendLine();
-            source.GenerateDeserializeMethod(fields, version);
+            // Serial constructor
+            source.GenerateSerialCtor(context, className);
+
+            // Serialize Method
+            source.GenerateMethodStart(
+                "Serialize",
+                AccessModifier.Public,
+                isOverride,
+                "void",
+                new ImmutableArray<(ITypeSymbol, string)>{ (genericWriterInterface, "writer") }
+            );
+            source.GenerateMethodEnd();
+
+            // Deserialize Method
+            source.GenerateMethodStart(
+                "Deserialize",
+                AccessModifier.Public,
+                isOverride,
+                "void",
+                new ImmutableArray<(ITypeSymbol, string)>{ (genericReaderInterface, "reader") }
+            );
+            source.GenerateMethodEnd();
+
+            source.GenerateClassEnd();
+            source.GenerateNamespaceEnd();
 
             source.GenerateClassEnd();
 

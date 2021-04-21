@@ -22,15 +22,16 @@ namespace SerializationGenerator
 {
     public static partial class SourceGeneration
     {
-        public static void GenerateProperty(
+        public static void GeneratePropertyStart(
             this StringBuilder source,
+            AccessModifier accessors,
             IFieldSymbol fieldSymbol,
             ISymbol serializableFieldAttribute
         )
         {
             var allAttributes = fieldSymbol.GetAttributes();
 
-            // get the name and type of the field
+            // Get the name and type of the field
             var fieldName = fieldSymbol.Name;
             var fieldType = fieldSymbol.Type;
 
@@ -62,19 +63,53 @@ namespace SerializationGenerator
                 source.GenerateAttribute(attr);
             }
 
-            source.AppendLine($@"        public {fieldType} {propertyName}
-        {{
-            get => {fieldName};
-            set
-            {{
-                if (value != {fieldName})
-                {{
-                    MarkDirty();
-                    {fieldName} = value;
-                }}
-            }}
-        }}
-");
+            source.AppendLine($@"        {accessors.ToFriendlyString()} {fieldType} {propertyName}
+        {{");
         }
+
+        public static void GenerateAutoProperty(
+            this StringBuilder source,
+            AccessModifier accessors,
+            string type,
+            string propertyName,
+            AccessModifier? getAccessor,
+            AccessModifier? setAccessor,
+            bool useInit = false
+        )
+        {
+            if (getAccessor == null && setAccessor == null)
+            {
+                throw new ArgumentNullException($"Must specify a {nameof(getAccessor)} or {nameof(setAccessor)} parameter");
+            }
+
+            var getter = getAccessor != null ? $"{getAccessor.Value.ToFriendlyString()} get;" : "";
+            var getterSpace = getAccessor != null ? " " : "";
+            var setOrInit = useInit ? "init" : "set";
+            var setter = setAccessor != null ? $"{getterSpace}{setAccessor.Value.ToFriendlyString()} {setOrInit};" : "";
+
+            source.AppendLine($@"{accessors.ToFriendlyString()} {type} {propertyName} {{ {getter}{setter} }}");
+        }
+
+        public static void GeneratePropertyEnd(this StringBuilder source) => source.AppendLine("        }");
+
+        public static void GeneratePropertyGetterReturnsField(this StringBuilder source, IFieldSymbol fieldSymbol) =>
+            source.AppendLine($"            get => {fieldSymbol.Name};");
+
+        public static void GeneratePropertyGetterStart(this StringBuilder source, bool useExpression) =>
+            source.AppendLine($"            get{(useExpression ? " => " : "\n            {")}");
+
+        public static void GeneratePropertyGetSetEnd(this StringBuilder source, bool useExpression)
+        {
+            if (!useExpression)
+            {
+                source.AppendLine("            }");
+            }
+        }
+
+        public static void GeneratePropertySetterSetsValue(this StringBuilder source, IFieldSymbol fieldSymbol) =>
+            source.AppendLine($"            set => {fieldSymbol.Name} = value;");
+
+        public static void GeneratePropertySetterStart(this StringBuilder source, bool useExpression, bool useInit = false) =>
+            source.AppendLine($"            {(useInit ? "init" : "set")}{(useExpression ? " => " : "\n            {")}");
     }
 }
