@@ -32,6 +32,8 @@ namespace SerializationGenerator
         {
             var serializableEntityAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableAttribute");
             var serializableFieldAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttribute");
+            var serializableFieldAttrAttribute =
+                context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttrAttribute");
             var serializableInterface = context.Compilation.GetTypeByMetadataName("Server.ISerializable");
             var genericWriterInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericWriter");
             var genericReaderInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericReader");
@@ -80,14 +82,36 @@ namespace SerializationGenerator
 
             foreach (IFieldSymbol fieldSymbol in fields)
             {
-                var hasAttribute = fieldSymbol.GetAttributes()
+                var allAttributes = fieldSymbol.GetAttributes();
+
+                var hasAttribute = allAttributes
                     .Any(
-                        attr => SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttribute)
+                        attr =>
+                            SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttribute)
                     );
 
                 if (hasAttribute)
                 {
-                    source.GenerateSerializableProperty(fieldSymbol, serializableFieldAttribute);
+                    foreach (var attr in allAttributes)
+                    {
+                        if (!SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttrAttribute))
+                        {
+                            continue;
+                        }
+
+                        if (attr.AttributeClass == null)
+                        {
+                            continue;
+                        }
+
+                        var ctorArgs = attr.ConstructorArguments;
+                        var attrType = ((Type)ctorArgs[0].Value).Name;
+                        var args = ctorArgs.Skip(1).ToImmutableArray();
+
+                        source.GenerateAttribute(attrType, args);
+                    }
+
+                    source.GenerateSerializableProperty(fieldSymbol);
                     source.AppendLine();
                 }
             }

@@ -13,6 +13,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -20,6 +21,34 @@ namespace SerializationGenerator
 {
     public static partial class SourceGeneration
     {
+        public static void GenerateAttribute(this StringBuilder source, string attrClassName, ImmutableArray<TypedConstant> args)
+        {
+            source.Append($"        [{attrClassName}");
+            var hasArgs = args.Length > 0;
+
+            if (hasArgs)
+            {
+                source.Append("(");
+            }
+
+            for (var i = 0; i < args.Length; i++)
+            {
+                var arg = args[i];
+                source.GenerateTypedConstant(arg);
+                if (i < args.Length - 1)
+                {
+                    source.Append(", ");
+                }
+            }
+
+            if (hasArgs)
+            {
+                source.Append(")");
+            }
+
+            source.AppendLine("]");
+        }
+
         public static void GenerateAttribute(this StringBuilder source, AttributeData attr)
         {
             source.Append($"        [{attr.AttributeClass?.Name}");

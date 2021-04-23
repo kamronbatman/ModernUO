@@ -2,7 +2,7 @@
  * ModernUO                                                              *
  * Copyright 2019-2021 - ModernUO Development Team                       *
  * Email: hi@modernuo.com                                                *
- * File: SerializableEntityGeneration.Property.cs                        *
+ * File: SerializableFieldAttributeAttribute.cs                          *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -13,37 +13,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-using System.Text;
-using Microsoft.CodeAnalysis;
+using System;
 
-namespace SerializationGenerator
+namespace Server
 {
-    public static partial class SerializableEntityGeneration
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class SerializableFieldAttrAttribute : Attribute
     {
-        public static void GenerateSerializableProperty(
-            this StringBuilder source,
-            IFieldSymbol fieldSymbol
-        )
+        public Type AttributeType { get; }
+        public object[] Arguments { get; }
+
+        public SerializableFieldAttrAttribute(Type type, params object[] args)
         {
-            var fieldName = fieldSymbol.Name;
+            if (typeof(Attribute).IsAssignableFrom(type))
+            {
+                throw new ArgumentException($"Argument {nameof(type)} must be an attribute.");
+            }
 
-            source.GeneratePropertyStart(AccessModifier.Public, fieldSymbol);
-
-            // Getter
-            source.GeneratePropertyGetterReturnsField(fieldSymbol);
-
-            // Setter
-            source.GeneratePropertySetterStart(false);
-            source.AppendLine(
-                $@"                if (value != {fieldName})
-                {{
-                    ((ISerializable)this).MarkDirty();
-                    {fieldName} = value;
-                }}"
-            );
-            source.GeneratePropertyGetSetEnd(false);
-
-            source.GeneratePropertyEnd();
+            AttributeType = type;
+            Arguments = args;
         }
     }
 }

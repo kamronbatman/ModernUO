@@ -25,12 +25,9 @@ namespace SerializationGenerator
         public static void GeneratePropertyStart(
             this StringBuilder source,
             AccessModifier accessors,
-            IFieldSymbol fieldSymbol,
-            ISymbol serializableFieldAttribute
+            IFieldSymbol fieldSymbol
         )
         {
-            var allAttributes = fieldSymbol.GetAttributes();
-
             // Get the name and type of the field
             var fieldName = fieldSymbol.Name;
             var fieldType = fieldSymbol.Type;
@@ -47,21 +44,6 @@ namespace SerializationGenerator
             }
 
             propertyName = propertyName.Dehumanize();
-
-            foreach (var attr in allAttributes)
-            {
-                if (SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttribute))
-                {
-                    continue;
-                }
-
-                if (attr.AttributeClass == null)
-                {
-                    continue;
-                }
-
-                source.GenerateAttribute(attr);
-            }
 
             source.AppendLine($@"        {accessors.ToFriendlyString()} {fieldType} {propertyName}
         {{");
