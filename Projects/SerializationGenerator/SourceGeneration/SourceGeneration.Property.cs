@@ -71,7 +71,7 @@ namespace SerializationGenerator
             var getterSpace = getAccessor != null ? " " : "";
             var setOrInit = useInit ? "init;" : "set;";
 
-            var setterAccessor = setAccessor != AccessModifier.None ? $"{setAccessor.Value.ToFriendlyString()} " : "";
+            var setterAccessor = setAccessor != AccessModifier.None ? $"{setAccessor?.ToFriendlyString() ?? ""} " : "";
             var setter = setterAccessor == "" ? "" : $"{getterSpace}{setterAccessor}{setOrInit}";
 
             var propertyAccessor = accessors == AccessModifier.None ? "" : $"{accessors.ToFriendlyString()} ";

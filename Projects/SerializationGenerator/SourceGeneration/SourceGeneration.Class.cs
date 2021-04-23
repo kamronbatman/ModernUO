@@ -45,5 +45,32 @@ namespace SerializationGenerator
         {
             source.AppendLine("    }");
         }
+
+        // TODO: Generalize this to any field using dynamic indentation
+        public static void GenerateClassField(
+            this StringBuilder source,
+            AccessModifier accessors,
+            InstanceModifier instance,
+            string type,
+            string variableName,
+            string value,
+            bool unusedPragma = false
+        )
+        {
+            if (unusedPragma)
+            {
+                source.AppendLine("#pragma warning disable 0414"); // assigned, but never used
+            }
+
+            var instanceStr = instance == InstanceModifier.None ? "" : $"{instance.ToFriendlyString()} ";
+            var accessorStr = accessors == AccessModifier.None ? "" : $"{accessors.ToFriendlyString()} ";
+            var valueStr = value == null ? "" : $" = {value}";
+            source.AppendLine($"        {accessorStr}{instanceStr}{type} {variableName}{valueStr};");
+
+            if (unusedPragma)
+            {
+                source.AppendLine("#pragma warning restore 0414");
+            }
+        }
     }
 }

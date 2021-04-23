@@ -64,7 +64,7 @@ namespace SerializationGenerator
                 return null; // We don't have the attribute
             }
 
-            var version = int.Parse(versionValue.ToString());
+            var version = versionValue.ToString();
             var namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
             var className = classSymbol.Name;
             HashSet<string> namespaceList = new();
@@ -79,6 +79,16 @@ namespace SerializationGenerator
                     ImmutableArray<ITypeSymbol>.Empty :
                     ImmutableArray.Create<ITypeSymbol>(serializableInterface)
             );
+
+            source.GenerateClassField(
+                AccessModifier.Private,
+                InstanceModifier.Const,
+                "int",
+                "_version",
+                version,
+                true
+            );
+            source.AppendLine();
 
             foreach (IFieldSymbol fieldSymbol in fields)
             {
