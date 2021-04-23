@@ -105,8 +105,16 @@ namespace SerializationGenerator
                         }
 
                         var ctorArgs = attr.ConstructorArguments;
-                        var attrType = ((ITypeSymbol)ctorArgs[0].Value)?.Name;
-                        source.GenerateAttribute(attrType, ctorArgs[1].Values);
+                        var attrTypeArg = ctorArgs[0];
+
+                        if (attrTypeArg.Kind == TypedConstantKind.Primitive && attrTypeArg.Value is string attrStr)
+                        {
+                            source.Append(attrStr);
+                        }
+                        else
+                        {
+                            source.GenerateAttribute(((ITypeSymbol)attrTypeArg.Value)?.Name, ctorArgs[1].Values);
+                        }
                     }
 
                     source.GenerateSerializableProperty(fieldSymbol);

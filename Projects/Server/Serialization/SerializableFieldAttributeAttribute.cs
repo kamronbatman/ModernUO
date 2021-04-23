@@ -20,8 +20,11 @@ namespace Server
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class SerializableFieldAttrAttribute : Attribute
     {
+        public string AttributeString { get; }
         public Type AttributeType { get; }
         public object[] Arguments { get; }
+
+        public SerializableFieldAttrAttribute(string attrString) => AttributeString = attrString;
 
         public SerializableFieldAttrAttribute(Type type, params object[] args)
         {
