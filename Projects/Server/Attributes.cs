@@ -119,7 +119,7 @@ namespace Server
         public AccessLevel AccessLevel { get; set; }
     }
 
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class CommandPropertyAttribute : Attribute
     {
         public CommandPropertyAttribute(AccessLevel level, bool readOnly)

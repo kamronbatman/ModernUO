@@ -13,7 +13,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
@@ -59,7 +58,7 @@ namespace SerializationGenerator
 
         public static void GenerateTypedConstants(this StringBuilder source, ImmutableArray<TypedConstant> args)
         {
-            source.Append('{');
+            source.Append("new []{");
             for (var i = 0; i < args.Length; i++)
             {
                 source.GenerateTypedConstant(args[i]);
