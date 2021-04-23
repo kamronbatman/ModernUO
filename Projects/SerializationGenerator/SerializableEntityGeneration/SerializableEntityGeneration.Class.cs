@@ -109,7 +109,7 @@ namespace SerializationGenerator
 
                         if (attrTypeArg.Kind == TypedConstantKind.Primitive && attrTypeArg.Value is string attrStr)
                         {
-                            source.Append(attrStr);
+                            source.AppendLine(attrStr);
                         }
                         else
                         {
