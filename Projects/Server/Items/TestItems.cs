@@ -6,10 +6,5 @@ namespace Server.Items
         [SerializableField(1)]
         [SerializableFieldAttr("[CommandProperty(AccessLevel.Administrator)]")]
         private int _someProperty;
-
-        // public void MigrateFrom(SomeItemV1Content v1Content)
-        // {
-        //     _someProperty = int.Parse(v1Content.SomeProperty);
-        // }
     }
 }
