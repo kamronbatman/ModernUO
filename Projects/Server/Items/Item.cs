@@ -1137,7 +1137,7 @@ namespace Server
                                 var length = OutgoingEntityPackets.CreateWorldEntity(hsWorldItem, this, true);
                                 if (length != hsWorldItem.Length)
                                 {
-                                    hsWorldItem = hsWorldItem.SliceToLength(length);
+                                    hsWorldItem = hsWorldItem[..length];
                                 }
 
                                 SendInfoTo(state, hsWorldItem, opl);
@@ -1147,7 +1147,7 @@ namespace Server
                                 var length = OutgoingEntityPackets.CreateWorldEntity(saWorldItem, this, false);
                                 if (length != saWorldItem.Length)
                                 {
-                                    saWorldItem = saWorldItem.SliceToLength(length);
+                                    saWorldItem = saWorldItem[..length];
                                 }
 
                                 SendInfoTo(state, saWorldItem, opl);
@@ -1157,7 +1157,7 @@ namespace Server
                                 var length = OutgoingItemPackets.CreateWorldItem(oldWorldItem, this);
                                 if (length != oldWorldItem.Length)
                                 {
-                                    oldWorldItem = oldWorldItem.SliceToLength(length);
+                                    oldWorldItem = oldWorldItem[..length];
                                 }
 
                                 SendInfoTo(state, oldWorldItem, opl);
@@ -3317,7 +3317,7 @@ namespace Server
 
                     if (length != buffer.Length)
                     {
-                        buffer = buffer.SliceToLength(length); // Adjust to the actual size
+                        buffer = buffer[..length]; // Adjust to the actual size
                     }
 
                     state.Send(buffer);
@@ -3351,7 +3351,7 @@ namespace Server
 
                     if (length != buffer.Length)
                     {
-                        buffer = buffer.SliceToLength(length); // Adjust to the actual size
+                        buffer = buffer[..length]; // Adjust to the actual size
                     }
 
                     state.Send(buffer);
