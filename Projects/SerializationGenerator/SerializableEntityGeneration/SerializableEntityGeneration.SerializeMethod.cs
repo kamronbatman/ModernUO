@@ -45,23 +45,24 @@ namespace SerializationGenerator
 
             var methods = GetSerializeMethods(genericWriterInterface);
 
-            foreach (var field in fields)
-            {
-                if (field.Type.SpecialType.)
-            }
+            // foreach (var field in fields)
+            // {
+            //     if (field.Type.SpecialType.)
+            // }
 
             source.GenerateMethodEnd();
         }
 
         public static ImmutableDictionary<string, IMethodSymbol> GetSerializeMethods(INamedTypeSymbol genericWriterInterface)
         {
-            return genericWriterInterface
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(x => !x.IsAbstract)
-                .Where(x => !x.Name.StartsWith("Write", StringComparison.OrdinalIgnoreCase))
-                .GroupBy(x => x.Parameters[0].Type.Name)
-                .ToImmutableDictionary(x => x.Key, x => x.ToList().First());
+            return ImmutableDictionary<string, IMethodSymbol>.Empty;
+            // return genericWriterInterface
+            //     .GetMembers()
+            //     .OfType<IMethodSymbol>()
+            //     .Where(x => !x.IsAbstract)
+            //     .Where(x => !x.Name.StartsWith("Write", StringComparison.OrdinalIgnoreCase))
+            //     .GroupBy(x => x.Parameters[0].Type.Name)
+            //     .ToImmutableDictionary(x => x.Key, x => x.ToList().First());
         }
     }
 }

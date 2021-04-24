@@ -47,7 +47,7 @@ namespace SerializationGenerator
                 TypeKind.Array => TypedConstantKind.Array,
                 TypeKind.Enum => TypedConstantKind.Enum,
                 TypeKind.Error => TypedConstantKind.Error,
-                _ => compilation?.IsSystemTypeReference(type) == true ? TypedConstantKind.Type : TypedConstantKind.Error
+                // _ => compilation?.IsSystemTypeReference(type) == true ? TypedConstantKind.Type : TypedConstantKind.Error
             };
         }
 

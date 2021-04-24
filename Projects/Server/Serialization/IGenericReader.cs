@@ -49,5 +49,6 @@ namespace Server
         HashSet<T> ReadEntitySet<T>() where T : class, ISerializable;
         Race ReadRace();
         int Read(Span<byte> buffer);
+        T ReadEnum<T>() where T : unmanaged, Enum;
     }
 }
