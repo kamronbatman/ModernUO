@@ -90,6 +90,8 @@ namespace SerializationGenerator
             );
             source.AppendLine();
 
+            var serializableFields = new List<IFieldSymbol>();
+
             foreach (IFieldSymbol fieldSymbol in fields)
             {
                 var allAttributes = fieldSymbol.GetAttributes();
@@ -102,6 +104,8 @@ namespace SerializationGenerator
 
                 if (hasAttribute)
                 {
+                    serializableFields.Add(fieldSymbol);
+
                     foreach (var attr in allAttributes)
                     {
                         if (!SymbolEqualityComparer.Default.Equals(attr.AttributeClass, serializableFieldAttrAttribute))
@@ -161,15 +165,11 @@ namespace SerializationGenerator
             source.AppendLine();
 
             // Serialize Method
-            source.GenerateMethodStart(
-                "Serialize",
-                AccessModifier.Public,
+            source.GenerateSerializeMethod(
                 isOverride,
-                "void",
-                ImmutableArray.Create<(ITypeSymbol, string)>((genericWriterInterface, "writer"))
+                genericWriterInterface,
+                serializableFields.ToImmutableArray()
             );
-            // Generate serialize method stuff here
-            source.GenerateMethodEnd();
             source.AppendLine();
 
             // Deserialize Method

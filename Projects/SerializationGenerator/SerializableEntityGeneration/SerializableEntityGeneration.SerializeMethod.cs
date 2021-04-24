@@ -2,7 +2,7 @@
  * ModernUO                                                              *
  * Copyright 2019-2021 - ModernUO Development Team                       *
  * Email: hi@modernuo.com                                                *
- * File: SerializableEntityGeneration.SerialCtor.cs                      *
+ * File: SerializableEntityGeneration.SerializeMethod.cs                 *
  *                                                                       *
  * This program is free software: you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -13,7 +13,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -21,30 +23,45 @@ namespace SerializationGenerator
 {
     public static partial class SerializableEntityGeneration
     {
-        private static readonly ImmutableArray<string> _baseParameters = new[] { "serial" }.ToImmutableArray();
-        public static void GenerateSerialCtor(
+        public static void GenerateSerializeMethod(
             this StringBuilder source,
-            GeneratorExecutionContext context,
-            string className,
-            bool isOverride
+            bool isOverride,
+            INamedTypeSymbol genericWriterInterface,
+            ImmutableArray<IFieldSymbol> fields
         )
         {
-            var serialType = (ITypeSymbol)context.Compilation.GetTypeByMetadataName("Server.Serial");
-
-            source.GenerateConstructorStart(
-                className,
+            source.GenerateMethodStart(
+                "Serialize",
                 AccessModifier.Public,
-                new []{ (serialType, "serial") }.ToImmutableArray(),
-                isOverride ? _baseParameters : ImmutableArray<string>.Empty
+                isOverride,
+                "void",
+                ImmutableArray.Create<(ITypeSymbol, string)>((genericWriterInterface, "writer"))
             );
 
-            if (!isOverride)
+            var indent = "            ";
+
+            // Writer version
+            source.AppendLine($"{indent}writer.WriteEncodedInt(_version);");
+
+            var methods = GetSerializeMethods(genericWriterInterface);
+
+            foreach (var field in fields)
             {
-                source.Append(@$"            Serial = serial;
-            SetTypeRef(typeof({className}));");
+                if (field.Type.SpecialType.)
             }
 
             source.GenerateMethodEnd();
+        }
+
+        public static ImmutableDictionary<string, IMethodSymbol> GetSerializeMethods(INamedTypeSymbol genericWriterInterface)
+        {
+            return genericWriterInterface
+                .GetMembers()
+                .OfType<IMethodSymbol>()
+                .Where(x => !x.IsAbstract)
+                .Where(x => !x.Name.StartsWith("Write", StringComparison.OrdinalIgnoreCase))
+                .GroupBy(x => x.Parameters[0].Type.Name)
+                .ToImmutableDictionary(x => x.Key, x => x.ToList().First());
         }
     }
 }

@@ -22,6 +22,35 @@ namespace SerializationGenerator
 {
     public static partial class SourceGeneration
     {
+        internal static TypedConstantKind GetTypedConstantKind(ITypeSymbol type, Compilation compilation)
+        {
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_Boolean:
+                case SpecialType.System_SByte:
+                case SpecialType.System_Int16:
+                case SpecialType.System_Int32:
+                case SpecialType.System_Int64:
+                case SpecialType.System_Byte:
+                case SpecialType.System_UInt16:
+                case SpecialType.System_UInt32:
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Single:
+                case SpecialType.System_Double:
+                case SpecialType.System_String:
+                case SpecialType.System_Enum:
+                    return TypedConstantKind.Primitive;
+            }
+
+            return type.TypeKind switch
+            {
+                TypeKind.Array => TypedConstantKind.Array,
+                TypeKind.Enum => TypedConstantKind.Enum,
+                TypeKind.Error => TypedConstantKind.Error,
+                _ => compilation?.IsSystemTypeReference(type) == true ? TypedConstantKind.Type : TypedConstantKind.Error
+            };
+        }
+
         public static void GetTypesFromTypedConstant(TypedConstant arg, List<ITypeSymbol> list)
         {
             if (arg.Kind == TypedConstantKind.Type)

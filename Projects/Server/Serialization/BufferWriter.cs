@@ -137,6 +137,37 @@ namespace Server
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void Write<T>(T value) where T : unmanaged, Enum
+        {
+            var size = sizeof(T);
+
+            switch (size)
+            {
+                default: throw new ArgumentException($"Argument of type {typeof(T)} is not a normal enum");
+                case 1:
+                    {
+                        Write(*(byte*)&value);
+                        break;
+                    }
+                case 2:
+                    {
+                        Write(*(ushort*)&value);
+                        break;
+                    }
+                case 4:
+                    {
+                        Write(*(uint*)&value);
+                        break;
+                    }
+                case 8:
+                    {
+                        Write(*(ulong*)&value);
+                        break;
+                    }
+            }
+        }
+
         public virtual long Seek(long offset, SeekOrigin origin)
         {
             Debug.Assert(

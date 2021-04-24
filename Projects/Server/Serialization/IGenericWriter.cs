@@ -51,6 +51,7 @@ namespace Server
         void Write(Race value);
         void Write<T>(ICollection<T> list) where T : class, ISerializable;
         void Write(ReadOnlySpan<byte> bytes);
+        void Write<T>(T value) where T : unmanaged, Enum;
 
         long Seek(long offset, SeekOrigin origin);
     }
