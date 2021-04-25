@@ -38,7 +38,7 @@ namespace SerializationGenerator
                 ImmutableArray.Create<(ITypeSymbol, string)>((genericWriterInterface, "writer"))
             );
 
-            var indent = "            ";
+            const string indent = "            ";
 
             source.AppendLine(@$"{indent}if (SavePosition > -1)
 {indent}{{
@@ -51,24 +51,17 @@ namespace SerializationGenerator
 
             var methods = GetSerializeMethods(genericWriterInterface);
 
-            // foreach (var field in fields)
-            // {
-            //     if (field.Type.SpecialType.)
-            // }
+            foreach (var field in fields)
+            {
+                source.SerializeField($"{indent}    ", field, compilation);
+            }
 
             source.GenerateMethodEnd();
         }
 
-        public static ImmutableDictionary<string, IMethodSymbol> GetSerializeMethods(INamedTypeSymbol genericWriterInterface)
+        private static void SerializeField(this StringBuilder source, IFieldSymbol field, Compilation compilation)
         {
-            return ImmutableDictionary<string, IMethodSymbol>.Empty;
-            // return genericWriterInterface
-            //     .GetMembers()
-            //     .OfType<IMethodSymbol>()
-            //     .Where(x => !x.IsAbstract)
-            //     .Where(x => !x.Name.StartsWith("Write", StringComparison.OrdinalIgnoreCase))
-            //     .GroupBy(x => x.Parameters[0].Type.Name)
-            //     .ToImmutableDictionary(x => x.Key, x => x.ToList().First());
+            
         }
 
         private static bool IsPrimitive(this ITypeSymbol symbol) =>
