@@ -27,9 +27,16 @@ namespace SerializationGenerator
         public const string GENERIC_WRITER_INTERFACE = "Server.IGenericWriter";
         public const string GENERIC_READER_INTERFACE = "Server.IGenericReader";
         public const string DELTA_DATE_TIME_ATTRIBUTE = "Server.DeltaDateTimeAttribute";
+        public const string POINT2D_STRUCT = "Server.Point2D";
+        public const string POINT3D_STRUCT = "Server.Point3D";
+        public const string RECTANGLE2D_STRUCT = "Server.Rectangle2D";
+        public const string RECTANGLE3D_STRUCT = "Server.Rectangle3D";
 
-        public static bool IsDeltaDateTime(this ISymbol symbol, Compilation compilation) =>
-            symbol.Equals(compilation.GetTypeByMetadataName(DELTA_DATE_TIME_ATTRIBUTE), SymbolEqualityComparer.Default);
+        public static bool IsDeltaDateTime(this AttributeData attr, Compilation compilation) =>
+            attr?.IsAttribute(compilation.GetTypeByMetadataName(DELTA_DATE_TIME_ATTRIBUTE)) == true;
+
+        public static bool IsAttribute(this AttributeData attr, ISymbol symbol) =>
+            attr?.AttributeClass?.Equals(symbol, SymbolEqualityComparer.Default) == true;
 
         public static bool IsEnum(this ITypeSymbol symbol) =>
             symbol.SpecialType == SpecialType.System_Enum || symbol.TypeKind == TypeKind.Enum;
@@ -77,5 +84,29 @@ namespace SerializationGenerator
             symbol.AllInterfaces.FirstOrDefault(
                 i => i.ContainsInterface(compilation.GetTypeByMetadataName("System.Collections.Generic.HashSet`1"))
             )?.TypeParameters[0].HasSerializableInterface(compilation) == true;
+
+        public static bool IsPoint2D(this ITypeSymbol symbol, Compilation compilation) =>
+            symbol.TypeKind == TypeKind.Struct && symbol.Equals(
+                compilation.GetTypeByMetadataName(POINT2D_STRUCT),
+                SymbolEqualityComparer.Default
+            );
+
+        public static bool IsPoint3D(this ITypeSymbol symbol, Compilation compilation) =>
+            symbol.TypeKind == TypeKind.Struct && symbol.Equals(
+                compilation.GetTypeByMetadataName(POINT3D_STRUCT),
+                SymbolEqualityComparer.Default
+            );
+
+        public static bool IsRectangle2D(this ITypeSymbol symbol, Compilation compilation) =>
+            symbol.TypeKind == TypeKind.Struct && symbol.Equals(
+                compilation.GetTypeByMetadataName(RECTANGLE2D_STRUCT),
+                SymbolEqualityComparer.Default
+            );
+
+        public static bool IsRectangle3D(this ITypeSymbol symbol, Compilation compilation) =>
+            symbol.TypeKind == TypeKind.Struct && symbol.Equals(
+                compilation.GetTypeByMetadataName(RECTANGLE3D_STRUCT),
+                SymbolEqualityComparer.Default
+            );
     }
 }

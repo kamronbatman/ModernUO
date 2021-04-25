@@ -39,7 +39,5 @@ namespace SerializationGenerator
 
             return list.ToImmutableArray();
         }
-
-        public static bool IsICollectionGeneric(this ITypeSymbol symbol)
     }
 }

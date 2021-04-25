@@ -14,6 +14,7 @@
  *************************************************************************/
 
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -49,8 +50,6 @@ namespace SerializationGenerator
             // Writer version
             source.AppendLine($"{indent}writer.WriteEncodedInt(_version);");
 
-            var methods = GetSerializeMethods(genericWriterInterface);
-
             foreach (var field in fields)
             {
                 source.SerializeField($"{indent}    ", field, compilation);
@@ -59,9 +58,35 @@ namespace SerializationGenerator
             source.GenerateMethodEnd();
         }
 
-        private static void SerializeField(this StringBuilder source, IFieldSymbol field, Compilation compilation)
+        private static void SerializeField(this StringBuilder source, string indent, IFieldSymbol field, Compilation compilation)
         {
-            
+            var fieldName = field.Name;
+            var fieldType = field.Type;
+
+            if (fieldType.IsEnum())
+            {
+                source.AppendLine($"{indent}writer.WriteEnum({fieldName})");
+                return;
+            }
+
+            // TODO: Add IP Address
+            var primitiveWrite = fieldType.IsPrimitive() ||
+                                 fieldType.IsPoint2D(compilation) ||
+                                 fieldType.IsPoint3D(compilation) ||
+                                 fieldType.IsRectangle2D(compilation) ||
+                                 fieldType.IsRectangle3D(compilation) ||
+                                 fieldType.HasSerializableInterface(compilation);
+
+            var attributes = field.GetAttributes();
+
+            if (primitiveWrite)
+            {
+                if (attributes.Any(a => a.IsDeltaDateTime(compilation)))
+                {
+                    source.AppendLine($"{indent}writer.WriteDeltaTime({fieldName})");
+                }
+                return;
+            }
         }
 
         private static bool IsPrimitive(this ITypeSymbol symbol) =>
