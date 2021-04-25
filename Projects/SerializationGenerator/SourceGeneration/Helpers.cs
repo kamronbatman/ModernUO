@@ -13,6 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 
@@ -22,5 +24,22 @@ namespace SerializationGenerator
     {
         public static bool ContainsInterface(this ITypeSymbol symbol, ISymbol interfaceSymbol) =>
             symbol?.AllInterfaces.Any(i => i.Equals(interfaceSymbol, SymbolEqualityComparer.Default)) ?? false;
+
+        public static ImmutableArray<IMethodSymbol> GetAllMethods(this ITypeSymbol symbol, string name)
+        {
+            var methods = symbol.GetMembers(name).OfType<IMethodSymbol>().ToImmutableArray();
+            if (symbol.ContainingSymbol is not ITypeSymbol typeSymbol)
+            {
+                return methods;
+            }
+
+            var list = new List<IMethodSymbol>();
+            list.AddRange(methods.ToList());
+            list.AddRange(GetAllMethods(typeSymbol, name).ToList());
+
+            return list.ToImmutableArray();
+        }
+
+        public static bool IsICollectionGeneric(this ITypeSymbol symbol)
     }
 }

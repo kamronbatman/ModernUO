@@ -323,7 +323,7 @@ namespace Server
                     }
                 case 3:
                     {
-                        var num = ReadInt();
+                        var num = ReadEncodedInt();
                         return *(T*)&num;
                     }
                 case 4:

@@ -13,9 +13,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>. *
  *************************************************************************/
 
-using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 
@@ -25,11 +23,13 @@ namespace SerializationGenerator
     {
         public static void GenerateSerializeMethod(
             this StringBuilder source,
+            Compilation compilation,
             bool isOverride,
-            INamedTypeSymbol genericWriterInterface,
             ImmutableArray<IFieldSymbol> fields
         )
         {
+            var genericWriterInterface = compilation.GetTypeByMetadataName(GENERIC_WRITER_INTERFACE);
+
             source.GenerateMethodStart(
                 "Serialize",
                 AccessModifier.Public,
@@ -39,6 +39,12 @@ namespace SerializationGenerator
             );
 
             var indent = "            ";
+
+            source.AppendLine(@$"{indent}if (SavePosition > -1)
+{indent}{{
+{indent}    writer.Seek(SavePosition, SeekOrigin.Begin);
+{indent}    return;
+{indent}}}");
 
             // Writer version
             source.AppendLine($"{indent}writer.WriteEncodedInt(_version);");
@@ -64,5 +70,26 @@ namespace SerializationGenerator
             //     .GroupBy(x => x.Parameters[0].Type.Name)
             //     .ToImmutableDictionary(x => x.Key, x => x.ToList().First());
         }
+
+        private static bool IsPrimitive(this ITypeSymbol symbol) =>
+            symbol.SpecialType switch
+            {
+                SpecialType.System_Boolean   => true,
+                SpecialType.System_SByte     => true,
+                SpecialType.System_Int16     => true,
+                SpecialType.System_Int32     => true,
+                SpecialType.System_Int64     => true,
+                SpecialType.System_Byte      => true,
+                SpecialType.System_UInt16    => true,
+                SpecialType.System_UInt32    => true,
+                SpecialType.System_UInt64    => true,
+                SpecialType.System_Single    => true,
+                SpecialType.System_Double    => true,
+                SpecialType.System_String    => true,
+                SpecialType.System_Decimal   => true,
+                SpecialType.System_DateTime  => true,
+                SpecialType.System_ValueType => true,
+                _                            => false
+            };
     }
 }

@@ -30,13 +30,15 @@ namespace SerializationGenerator
             GeneratorExecutionContext context
         )
         {
-            var serializableEntityAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableAttribute");
-            var serializableFieldAttribute = context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttribute");
+            var compilation = context.Compilation;
+
+            var serializableEntityAttribute =
+                compilation.GetTypeByMetadataName(SERIALIZABLE_ATTRIBUTE);
+            var serializableFieldAttribute =
+                compilation.GetTypeByMetadataName(SERIALIZABLE_FIELD_ATTRIBUTE);
             var serializableFieldAttrAttribute =
-                context.Compilation.GetTypeByMetadataName("Server.SerializableFieldAttrAttribute");
-            var serializableInterface = context.Compilation.GetTypeByMetadataName("Server.ISerializable");
-            var genericWriterInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericWriter");
-            var genericReaderInterface = context.Compilation.GetTypeByMetadataName("Server.IGenericReader");
+                compilation.GetTypeByMetadataName(SERIALIZABLE_FIELD_ATTR_ATTRIBUTE);
+            var serializableInterface = compilation.GetTypeByMetadataName(SERIALIZABLE_INTERFACE);
 
             // This is a class symbol if the containing symbol is the namespace
             if (!classSymbol.ContainingSymbol.Equals(classSymbol.ContainingNamespace, SymbolEqualityComparer.Default))
@@ -166,8 +168,8 @@ namespace SerializationGenerator
 
             // Serialize Method
             source.GenerateSerializeMethod(
+                compilation,
                 isOverride,
-                genericWriterInterface,
                 serializableFields.ToImmutableArray()
             );
             source.AppendLine();
